@@ -3050,7 +3050,7 @@ Customize `magit-diff-refine-hunk' to change the default mode."
                            (match-string-no-properties 1)))))
              (magit-set-section-info (list status
                                            file
-                                           (or file2 file)
+                                           file2
                                            magit-current-diff-range))
              (magit-insert-diff-title status file file2)
              (when (search-forward-regexp "\\(--- \\(.*\\)\n\\+\\+\\+ \\(.*\\)\n\\)" () t)
@@ -3149,7 +3149,7 @@ Customize `magit-diff-refine-hunk' to change the default mode."
         (goto-char p)
         (cond
          ((eq status 'typechange)
-          (magit-insert-diff-title status file file)
+          (magit-insert-diff-title status file nil)
           (magit-wash-typechange-section file))
          (t
           (magit-wash-diff-section)))
@@ -5763,7 +5763,8 @@ This is only non-nil in reflog buffers.")
       (error "No diff at this location"))
     (let* ((type (magit-diff-item-kind diff))
            (file1 (magit-diff-item-file diff))
-           (file2 (magit-diff-item-file2 diff))
+           (file2 (or (magit-diff-item-file2 diff)
+                      file1))
            (range (magit-diff-item-range diff)))
       (cond
        ((memq type '(new deleted typechange))

@@ -4323,6 +4323,8 @@ at point."
     ((staged diff)
      (cond ((eq (car info) 'unmerged)
             (error "Can't unstage an unmerged file.  Resolve it first"))
+           ((eq (car info) 'renamed)
+            (magit-run-git "mv" (magit-diff-item-file2 item) (magit-diff-item-file item)))
            ((magit-no-commit-p)
             (magit-run-git "rm" "--cached" "--" (magit-diff-item-file item)))
            (t

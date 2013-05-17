@@ -2981,7 +2981,7 @@ Customize `magit-diff-refine-hunk' to change the default mode."
                         (format "Deleted    %s" file))
                        ((renamed)
                         (format "Renamed    %s   (from %s)"
-                                file file2))
+                                file2 file))
                        ((modified)
                         (format "Modified   %s" file))
                        ((typechange)
@@ -3164,7 +3164,7 @@ Customize `magit-diff-refine-hunk' to change the default mode."
 
 (defun magit-wash-raw-diff ()
   (if (looking-at
-       ":\\([0-7]+\\) \\([0-7]+\\) [0-9a-f]+ [0-9a-f]+ \\(.\\)[0-9]*\t\\([^\t\n]+\\)$")
+       ":\\([0-7]+\\) \\([0-7]+\\) [0-9a-f]+ [0-9a-f]+ \\(.\\)[0-9]*\t\\([^\t\n]+\\)\\(\t\\([^\t\n]+\\)\\)?$")
       (let ((old-perm (match-string-no-properties 1))
             (new-perm (match-string-no-properties 2))
             (status (cl-case (string-to-char (match-string-no-properties 3))
@@ -3173,8 +3173,10 @@ Customize `magit-diff-refine-hunk' to change the default mode."
                       (?M 'modified)
                       (?U 'unmerged)
                       (?T 'typechange)
+                      (?R 'renamed)
                       (t     nil)))
-            (file (match-string-no-properties 4)))
+            (file  (match-string-no-properties 4))
+            (file2 (match-string-no-properties 6)))
         ;; If this is for the same file as the last diff, ignore it.
         ;; Unmerged files seem to get two entries.
         ;; We also ignore unmerged files when told so.
@@ -3192,10 +3194,12 @@ Customize `magit-diff-refine-hunk' to change the default mode."
             (magit-with-section file 'diff
               (delete-region (point) (+ (line-end-position) 1))
               (if (not (magit-section-hidden magit-top-section))
-                  (magit-insert-diff file status)
-                (magit-set-section-info (list status file nil))
+                  (if (eq status 'renamed)
+                      (magit-insert-diff-title status file file2)
+                     (magit-insert-diff file status))
+                (magit-set-section-info (list status file file2))
                 (magit-set-section-needs-refresh-on-show t)
-                (magit-insert-diff-title status file nil)))))
+                (magit-insert-diff-title status file file2)))))
         t)
     nil))
 
@@ -3408,6 +3412,7 @@ member of ARGS, or to the working file otherwise."
               (magit-ignore-unmerged-raw-diffs t))
           (magit-git-section 'staged "Staged changes:" 'magit-wash-raw-diffs
                              "diff-index" "--cached"
+                             "--find-renames"
                              base))))))
 
 ;;; Logs and Commits

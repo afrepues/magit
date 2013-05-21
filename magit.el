@@ -5775,7 +5775,7 @@ This is only non-nil in reflog buffers.")
                       file1))
            (range (magit-diff-item-range diff)))
       (cond
-       ((memq type '(new deleted typechange))
+       ((memq type '(new deleted renamed typechange))
         (message "Why ediff a %s file?" type))
        ((and (eq type 'unmerged)
              (eq (cdr range) 'working))

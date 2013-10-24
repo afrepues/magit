@@ -358,7 +358,7 @@ Only considered when moving past the last entry with
   :group 'magit
   :type 'hook)
 
-(defcustom magit-status-insert-sections-hook
+(defcustom magit-status-insert-sections-functions
   '(magit-insert-status-local-line
     magit-insert-status-remote-line
     magit-insert-status-head-line
@@ -374,7 +374,7 @@ Only considered when moving past the last entry with
     magit-insert-staged-changes
     magit-insert-unpulled-commits
     magit-insert-unpushed-commits)
-  "Hook run to insert sections into the status buffer.
+  "Functions run to insert sections into the status buffer.
 
 This option allows reordering the sections and adding sections
 that are by default displayed in other Magit buffers.  Doing the
@@ -384,9 +384,26 @@ take no argument can be used and some functions exist that begin
 with the `magit-insert-' prefix but do not insert a section.
 
 Note that there are already plans to improve this and to add
-similar hooks for other Magit modes."
+similar customization variables for other Magit modes."
   :group 'magit
-  :type 'hook)
+  :type '(repeat
+          (choice
+           (function-item magit-insert-status-local-line)
+           (function-item magit-insert-status-remote-line)
+           (function-item magit-insert-status-head-line)
+           (function-item magit-insert-status-tags-line)
+           (function-item magit-insert-status-merge-line)
+           (function-item magit-insert-status-rebase-lines)
+           (function-item magit-insert-empty-line)
+           (function-item magit-insert-stashes)
+           (function-item magit-insert-untracked-files)
+           (function-item magit-insert-pending-changes)
+           (function-item magit-insert-pending-commits)
+           (function-item magit-insert-unstaged-changes)
+           (function-item magit-insert-staged-changes)
+           (function-item magit-insert-unpulled-commits)
+           (function-item magit-insert-unpushed-commits)
+           (function :tag "Custom function"))))
 
 (defcustom magit-status-tags-line-subject 'head
   "Whether tag or head is the subject on tags line in status buffer.
@@ -4582,7 +4599,7 @@ when asking for user input."
   (magit-git-exit-code "update-index" "--refresh")
   (magit-create-buffer-sections
     (magit-with-section 'status nil
-      (run-hooks 'magit-status-insert-sections-hook)))
+      (run-hooks 'magit-status-insert-sections-functions)))
   (run-hooks 'magit-refresh-status-hook))
 
 ;;; Status Sections

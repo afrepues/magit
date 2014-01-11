@@ -4605,11 +4605,13 @@ when asking for user input."
 ;;;; Real Sections
 
 (magit-define-inserter stashes ()
+  "Stashes in the repository"
   (magit-git-section 'stashes
                      "Stashes:" 'magit-wash-stashes
                      "stash" "list"))
 
 (magit-define-inserter untracked-files ()
+  "List of untracked files"
   (unless (string= (magit-get "status" "showUntrackedFiles") "no")
     (apply 'magit-git-section
            `(untracked
@@ -4633,6 +4635,7 @@ when asking for user input."
          t)))))
 
 (magit-define-inserter pending-commits ()
+  "List of pending commits"
   (let* ((info (magit-read-rewrite-info))
          (pending (cdr (assq 'pending info))))
     (when pending
@@ -4655,6 +4658,7 @@ when asking for user input."
       (insert "\n"))))
 
 (magit-define-inserter pending-changes ()
+  "Pending changes of an ongoing rewrite"
   (let* ((info (magit-read-rewrite-info))
          (orig (cadr (assq 'orig info))))
     (when orig
@@ -4665,6 +4669,7 @@ when asking for user input."
                            "diff" (magit-diff-U-arg) "-R" orig)))))
 
 (magit-define-inserter unstaged-changes ()
+  "Unstaged changes"
   (let ((magit-hide-diffs t)
         (magit-current-diff-range (cons 'index 'working))
         (magit-diff-options (append '() magit-diff-options)))
@@ -4673,6 +4678,7 @@ when asking for user input."
                        "diff-files")))
 
 (magit-define-inserter staged-changes ()
+  "Staged changes"
   (let ((no-commit (not (magit-git-success "log" "-1" "HEAD"))))
     (when (or no-commit (magit-anything-staged-p))
       (let ((magit-current-diff-range (cons "HEAD" 'index))
@@ -4687,6 +4693,7 @@ when asking for user input."
                            base)))))
 
 (magit-define-inserter unpulled-commits ()
+  "List of unpulled commits for current branch"
   (let ((tracked (magit-get-tracked-branch nil t)))
     (when tracked
       (magit-git-section 'unpulled "Unpulled commits:"
@@ -4696,6 +4703,7 @@ when asking for user input."
                          (concat "HEAD.." tracked)))))
 
 (magit-define-inserter unpushed-commits ()
+  "List of unpushed commits for current branch"
   (let ((tracked (magit-get-tracked-branch nil t)))
     (when tracked
       (magit-git-section 'unpushed "Unpushed commits:"
@@ -4716,6 +4724,7 @@ when asking for user input."
           info-string "\n"))
 
 (defun magit-insert-status-local-line ()
+  "Information on the local work tree"
   (magit-insert-status-line "Local"
     (concat (propertize (if (magit--bisecting-p)
                             (magit--bisect-info-for-status)
@@ -4725,6 +4734,7 @@ when asking for user input."
             " " (abbreviate-file-name default-directory))))
 
 (magit-define-inserter status-remote-line ()
+  "Information on the remote tracked branch"
   (let* ((branch  (magit-get-current-branch))
          (tracked (magit-get-tracked-branch branch)))
     (when tracked
@@ -4744,11 +4754,13 @@ when asking for user input."
                         " (" (magit-get "remote" remote "url") ")"))))))
 
 (defun magit-insert-status-head-line ()
+  "Shows where HEAD points"
   (magit-insert-status-line "Head"
     (or (magit-format-commit "HEAD" "%h %s")
         "nothing committed (yet)")))
 
 (defun magit-insert-status-tags-line ()
+  "Tags closest to HEAD and how far away they are"
   (let* ((current-tag (magit-get-current-tag t))
          (next-tag (magit-get-next-tag t))
          (both-tags (and current-tag next-tag t))
@@ -4773,6 +4785,7 @@ when asking for user input."
                        " " (if behindp "behind" "ahead") ")"))))
 
 (defun magit-insert-status-merge-line ()
+  "Status of an ongoing merge"
   (let ((heads (magit-file-lines (magit-git-dir "MERGE_HEAD"))))
     (when heads
       (magit-insert-status-line "Merging"
@@ -4781,6 +4794,7 @@ when asking for user input."
          "; Resolve conflicts, or press \"m A\" to Abort")))))
 
 (defun magit-insert-status-rebase-lines ()
+  "Status of an ongoing rebase"
   (let ((rebase (magit-rebase-info)))
     (when rebase
       (magit-insert-status-line "Rebasing"
@@ -4792,6 +4806,7 @@ when asking for user input."
           (magit-format-commit (nth 3 rebase) "%h %s"))))))
 
 (defun magit-insert-empty-line ()
+  "An empty line"
   (insert "\n"))
 
 ;;; Various Utilities (2)

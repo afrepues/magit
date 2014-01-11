@@ -413,15 +413,13 @@ Only considered when moving past the last entry with
   :group 'magit
   :type 'boolean)
 
-(defcustom magit-log-format-graph-function nil
+(defcustom magit-log-format-graph-function identity
   "Function used to format graphs in log buffers.
 The function is called with one argument, the propertized graph
 of a single line in as a string.  It has to return the formatted
-string.  This option can also be nil, in which case the graph is
-inserted as is."
+string."
   :group 'magit
-  :type '(choice (const :tag "insert as is" nil)
-                 function))
+  :type '(function))
 
 (defcustom magit-log-show-margin t
   "Whether to use a margin when showing `oneline' logs.
@@ -4329,9 +4327,7 @@ Customize variable `magit-diff-refine-hunk' to change the default mode."
           (insert (propertize hash 'face 'magit-log-sha1) " ")
         (insert (make-string (1+ magit-sha1-abbrev-length) ? ))))
     (when graph
-      (if magit-log-format-graph-function
-          (insert (funcall magit-log-format-graph-function graph))
-        (insert graph)))
+      (insert (funcall magit-log-format-graph-function graph)))
     (when (and hash (eq style 'long))
       (insert (propertize (if refs hash (magit-rev-parse hash))
                           'face 'magit-log-sha1) " "))

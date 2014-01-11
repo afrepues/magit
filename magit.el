@@ -2038,17 +2038,16 @@ an existing remote."
 
 ;;;; Section Creation
 
-(defmacro magit-define-inserter (sym arglist &rest body)
+(defmacro magit-define-inserter (sym arglist &rest doc body)
   (declare (indent defun))
   (let ((fun (intern (format "magit-insert-%s" sym)))
         (before (intern (format "magit-before-insert-%s-hook" sym)))
-        (after (intern (format "magit-after-insert-%s-hook" sym)))
-        (doc (format "Insert items for `%s'." sym)))
+        (after (intern (format "magit-after-insert-%s-hook" sym))))
     `(progn
        (defvar ,before nil)
        (defvar ,after nil)
        (defun ,fun ,arglist
-         ,doc
+         ,@doc
          (run-hooks ',before)
          ,@body
          (run-hooks ',after))

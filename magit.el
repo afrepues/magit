@@ -421,6 +421,45 @@ string."
   :group 'magit
   :type '(function))
 
+(defconst magit-log-git-graph-chars
+  "*|-/\\"
+  "The characters used by git for the graph of git log.")
+
+(defconst magit-log-git-graph-chars-re
+  (regexp-opt (mapcar 'string
+		      (string-to-list magit-git-log-graph-chars)))
+  "Regular expression matching the graph chars output by git.")
+
+(defcustom magit-log-graph-custom-chars "●│─╱╲"
+  "Characters used to draw the git-log's graph in the log buffer.
+If you you see garbage in the log, either change the font used by
+Emacs or chose a different set of characters."
+  :group 'magit
+  :type '(radio :tag "Log Graph Characters"
+                (const :tag "●│─╱╲")
+                (vector :tag "Pick individual character"
+                        (radio :tag "Node"
+                               (const :tag "*" ?*)
+                               (const :tag "●" #x25cf)
+                               (const :tag "○" #x25cb)
+                               (const :tag "◉" #x25c9)
+                               (const :tag "■" #x25a0)
+                               (const :tag "□" #x25a1)
+                               (const :tag "█" #x2588))
+                        (radio :tag "Vertical"
+                               (const :tag "|" ?|)
+                               (const :tag "│" ?│))
+                        (radio :tag "Horizontal"
+                               (const :tag "-" ?-)
+                               (const :tag "─" ?─))
+                        (radio :tag "Lower-Left to Upper-Right"
+                               (const :tag "/" ?/)
+                               (const :tag "╱" ?╱))
+                        (radio :tag "Upper-Left to Lower-Right"
+                               (const :tag "\\" ?\\)
+                               (const :tag "╲" ?╲))
+                        )))
+
 (defcustom magit-log-show-margin t
   "Whether to use a margin when showing `oneline' logs.
 When non-nil the author name and date are displayed in the margin
@@ -4361,6 +4400,20 @@ Customize variable `magit-diff-refine-hunk' to change the default mode."
                  (magit-wash-log-line 'long))))))
       (forward-line)))
   t)
+
+(defun magit-format-graph-custom-chars (graph)
+  "Translate the log graph to a custom set of characters."
+  (save-match-data
+    (while (string-match magit-log-git-graph-chars-re graph)
+      (let* ((properties (text-properties-at (match-beginning 0) graph))
+	     (char-pos (search (match-string-no-properties 0 graph)
+			       magit-log-git-graph-chars))
+	     (new-char (string (aref magit-log-graph-chars char-pos))))
+	(when properties
+	  (set-text-properties 0 1 properties new-char))
+	(setq graph (replace-match new-char t t graph))
+	))
+    graph))
 
 (defun magit-format-log-margin (&optional author date)
   (when (and magit-log-show-margin

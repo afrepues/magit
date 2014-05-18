@@ -964,8 +964,8 @@ of a single line in as a string.  It has to return the formatted
 string."
   :package-version '(magit . "2.1.0")
   :group 'magit-log
-  :type '(choice (function-item :tag "insert as is" identity)
-                 (function-item magit-log-format-unicode-graph)
+  :type '(choice (function-item :tag "Insert as is" identity)
+                 (function-item :tag "Translate to unicode" magit-log-format-unicode-graph)
                  function))
 
 (defcustom magit-log-format-unicode-graph-alist

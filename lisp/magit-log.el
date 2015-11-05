@@ -708,12 +708,14 @@ Do not add this to a hook variable."
 (defconst magit-log-oneline-re
   (concat "^"
           "\\(?4:[-_/|\\*o. ]*\\)"                 ; graph
+          "\\(?:"
           "\\(?1:[0-9a-fA-F]+\\) "                 ; sha1
           "\\(?:\\(?3:([^()]+)\\) \\)?"            ; refs
           "\\(?7:[BGUN]\\)?"                       ; gpg
           "\\[\\(?5:[^]]*\\)\\]"                   ; author
           "\\[\\(?6:[^]]*\\)\\]"                   ; date
-          "\\(?2:.*\\)$"))                         ; msg
+          "\\(?2:.*\\)"                            ; msg
+          "\\)?$"))
 
 (defconst magit-log-cherry-re
   (concat "^"
@@ -834,8 +836,12 @@ Do not add this to a hook variable."
         (magit-insert side (if (string= side "<")
                                'magit-diff-removed
                              'magit-diff-added) ?\s))
-      (insert (propertize hash 'face 'magit-hash) ?\s)
+      (when hash
+        (insert (propertize hash 'face 'magit-hash) ?\s))
       (when graph
+        (unless hash
+          (let ((align (make-string (1+ abbrev) ? )))
+            (insert align)))
         (insert (funcall magit-log-format-graph-function graph)))
       (when (and refs (not magit-log-show-refname-after-summary))
         (magit-insert (magit-format-ref-labels refs) nil ?\s))
